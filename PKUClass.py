@@ -230,6 +230,11 @@ class PKUClass(User):
         控制台打印表格
         :return:
         """
+        for column in self.result:
+            for ind in range(len(column)):
+                if column[ind] is None:
+                    column[ind] = "空"
+
         # ["课程名","课程类别","学分","周学时","教师","班号","开课单位","年级","上课/考试信息","限选/已选","补选"]
         fmt = "{0:<1}\t{1:{5}<8}\t{2:{5}<10}\t{3:{5}<5}\t{4}"
         length = len(self.result[0])
@@ -306,13 +311,15 @@ class PKUClass(User):
         :param link:
         :return:
         """
+
         resp = self.get(link, headers=self.supplement_header)
 
         xpath = "(//*[@id='msgTips'])[1]//text()"
         msgs = HTML(resp.text).xpath(xpath)
         msg = [i.strip() for i in msgs if len(i.strip()) > 2][0]
+
+        print(f"pid:{os.getpid()} 结束:{msg}")
         if "成功" in msg:
-            print(f"pid:{os.getpid()} 结束:{msg}")
             self.end = True
 
     def refresh(self, index=None, sleep=3):
@@ -333,7 +340,7 @@ class PKUClass(User):
         }
         start = 20 * int(data["index"]) // 20
         resp = self.post(self.refresh_limit, data=data,
-                         headers={"Referer": self.supplement + f"?netui_row=electableListGrid%3B{start}"}).json()
+                         headers={"Referer": self.supplement + f"?netui_row=electableListGrid%3B{start}"})
 
         if resp['electedNum'] == resp['limitNum']:
             print(f"pid:{os.getpid()} 没有空余名额！")
@@ -393,8 +400,8 @@ def select(course_name):
 
 
 if __name__ == "__main__":
-    name_list = ["信息系统分析与设计", "复杂网络理论与实践"]
-
+    # name_list = ["信息系统分析与设计", "复杂网络理论与实践"]
+    name_list = ["实用英语：从听说到演讲", "社会学概论"]
     stat_time = time.time()
 
     process_list = []
@@ -408,4 +415,4 @@ if __name__ == "__main__":
 
     print(f"total time:{time.time() - stat_time}")
 
-    # PkuClass(auto_mode=False, auto_verify=True).run()
+    # PKUClass(auto_mode=False, auto_verify=False).run()
