@@ -1,13 +1,11 @@
 import base64
 import json
 import requests
+from Config import TuJianSetting
 
 
-class TuJian:
+class TuJian(TuJianSetting):
     def __init__(self):
-        self.uname = 'banksy'
-        self.pwd = 'whg8824780'
-
         self.typeid = 3
 
     def check(self, img):
