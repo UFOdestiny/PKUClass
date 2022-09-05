@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Name     : PkuClass.py
 # @Date     : 2022/9/4 10:48
-# @Auth     : Yu Dahai
-# @Email    : yudahai@pku.edu.cn
+# @Auth     : UFOdestiny
 # @Desc     :
 
 from Config import User
