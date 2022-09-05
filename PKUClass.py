@@ -21,7 +21,7 @@ from Verify import TuJian
 os.environ['no_proxy'] = '*'
 
 
-class PkuClass(User):
+class PKUClass(User):
     headers = {
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1", }
 
@@ -388,7 +388,7 @@ def select(course_name):
     :param course_name: 课程名
     :return:
     """
-    PkuClass(course_name=course_name,
+    PKUClass(course_name=course_name,
              auto_mode=True,
              auto_verify=True).run()
 
