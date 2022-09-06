@@ -10,12 +10,11 @@ import random
 import time
 from multiprocessing import Process
 
-from lxml.etree import HTML
 import requests
-from requests.adapters import HTTPAdapter, Retry
+from lxml.etree import HTML
 from requests.utils import dict_from_cookiejar
 
-from Config import User
+from Config import User as User
 from Verify import TuJian
 
 # 去除代理
@@ -23,43 +22,44 @@ os.environ['no_proxy'] = '*'
 
 
 class Const:
-    headers = {
-        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1", }
+    headers = {"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X)"
+                             " AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1", }
 
     auth_url = 'https://iaaa.pku.edu.cn/iaaa/oauthlogin.do'
 
-    redirUrl = "http://elective.pku.edu.cn:80/elective2008/ssoLogin.do"
-
-    ssoLogin = "https://elective.pku.edu.cn/elective2008/ssoLogin.do"
-
-    HelpController = "https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/help/HelpController.jpf"
-
-    SupplyCancel_url = "https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do"
-
-    SupplyCancel_header = {
-        "Referer": "https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/help/HelpController.jpf", }
-
-    supplement = "https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/supplement/supplement.jsp"
-
     domain = "https://elective.pku.edu.cn/"
 
-    verify_image = "https://elective.pku.edu.cn/elective2008/DrawServlet"
-    validate = "https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/supplement/validate.do"
+    redirUrl = "http://elective.pku.edu.cn:80/elective2008/ssoLogin.do"
 
-    refresh_limit = "https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/supplement/refreshLimit.do"
+    ssoLogin = f"{domain}elective2008/ssoLogin.do"
+
+    HelpController = f"{domain}elective2008/edu/pku/stu/elective/controller/help/HelpController.jpf"
+
+    SupplyCancel_url = f"{domain}elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do"
+
+    SupplyCancel_header = {"Referer": f"{domain}elective2008/edu/pku/stu/elective/controller/help/HelpController.jpf", }
+
+    supplement = f"{domain}elective2008/edu/pku/stu/elective/controller/supplement/supplement.jsp"
+
+    verify_image = f"{domain}elective2008/DrawServlet"
+    validate = f"{domain}elective2008/edu/pku/stu/elective/controller/supplement/validate.do"
+
+    refresh_limit = f"{domain}elective2008/edu/pku/stu/elective/controller/supplement/refreshLimit.do"
 
     username = User.username
     password = User.password
 
-    supplement_header = {
-        "Referer": f"https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do?xh={username}"}
+    s_h = {'Referer': f"{domain}elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do?xh={username}"}
 
     session = requests.session()
-    session.mount('https://', HTTPAdapter(max_retries=Retry(total=5, allowed_methods=frozenset(['GET', 'POST']))))
+    # session.mount('http://', HTTPAdapter(max_retries=Retry(total=2, allowed_methods=frozenset(['GET', 'POST']))))
+    # session.mount('https://', HTTPAdapter(max_retries=Retry(total=2, allowed_methods=frozenset(['GET', 'POST']))))
     cookie = None
 
 
 class Network:
+    retry = 5
+
     def request(self, method, url, raw=False, headers=None, **kwargs):
         """
         请求函数
@@ -75,11 +75,19 @@ class Network:
         if headers:
             headers.update(header)
 
-        if Const.session:
-            resp = Const.session.request(method, url, headers=header, **kwargs)
-        else:
-            resp = requests.request(method, url, headers=headers, cookies=Const.cookie, **kwargs)
+        try:
+            if Const.session:
+                resp = Const.session.request(method, url, headers=header, timeout=2, **kwargs)
+            else:
+                resp = requests.request(method, url, headers=headers, cookies=Const.cookie, timeout=3, **kwargs)
 
+        except requests.exceptions.ReadTimeout:
+            self.retry -= 1
+            if self.retry:
+                print(f"pid:{os.getpid()} 登陆失败！重试——→{self.retry}")
+                resp = self.request(method, url, raw=True, headers=None, **kwargs)
+
+        self.retry = 5
         if not resp.ok:
             raise Exception(resp.status_code)
 
@@ -168,7 +176,6 @@ class Login(Network):
         """
         resp = self.get(Const.SupplyCancel_url, params={"xh": Const.username},
                         headers=Const.SupplyCancel_header, )
-
         self.raw_pages = [resp.text]
 
     def get_supplement(self, limit=100):
@@ -186,7 +193,7 @@ class Login(Network):
             for page_number in range(2, min(page_total_number + 1, limit + 1)):
                 raw_page = self.get(Const.supplement,
                                     params={'netui_row': f'electableListGrid;{20 * (page_number - 1)}'},
-                                    headers=Const.supplement_header,
+                                    headers=Const.s_h,
                                     )
                 self.raw_pages.append(raw_page.text)
 
@@ -240,6 +247,9 @@ class Login(Network):
 
     def initialize(self):
         self.get_SupplyCancel()
+
+        self.re_login()
+
         self.get_supplement()
         self.table()
 
@@ -247,6 +257,15 @@ class Login(Network):
             self.print_table()
 
         return self.result, self.action
+
+    def re_login(self):
+        if "您尚未登录或者会话超时" in self.raw_pages[0]:
+            print(f"pid:{os.getpid()} 会话超时！重试！")
+            Const.session = requests.session()
+            self.login_portal()
+            self.login_elective()
+            self.get_SupplyCancel()
+            self.re_login()
 
     def run(self):
         self.login_portal()
@@ -316,7 +335,7 @@ class Elective(Network):
 
         rand = 10000 * random.random()
         resp = self.get(Const.verify_image, params={"Rand": rand},
-                        headers=Const.supplement_header)
+                        headers=Const.s_h)
 
         path = f"{index}.png"
         with open(path, 'wb') as file:
@@ -324,15 +343,14 @@ class Elective(Network):
 
         if self.auto_verify:
             code = self.verifier.check(path)
-
             # print(f"pid:{os.getpid()} 验证码自动预测为：{code}")
 
         else:
-            code = input("输入验证码:\n")
+            code = input("输入验证码:")
 
         post = self.post(url=Const.validate,
                          data={"xh": Const.username, "validCode": code},
-                         headers=Const.supplement_header)
+                         headers=Const.s_h)
 
         if post["valid"] == '2':
             # print(f"pid:{os.getpid()} 验证码正确！")
@@ -348,7 +366,7 @@ class Elective(Network):
         :return:
         """
 
-        resp = self.get(link, headers=Const.supplement_header)
+        resp = self.get(link, headers=Const.s_h)
 
         xpath = "(//*[@id='msgTips'])[1]//text()"
         msgs = HTML(resp.text).xpath(xpath)
@@ -394,9 +412,9 @@ class Elective(Network):
             if self.result[0][index] == self.course_name:
                 self.manipulate([self.result[-1][index], self.action[index], index])
 
-                if not self.end:
-                    self.re_initialize()
-                    self.locate()
+                # if not self.end:
+                #     self.re_initialize()
+                #     self.locate()
 
     def run(self):
         """
