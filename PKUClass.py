@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # @Name     : PKUClass.py
 # @Date     : 2022/9/6 10:33
@@ -324,7 +325,7 @@ class Elective(Network):
         if self.auto_verify:
             code = self.verifier.check(path)
 
-            print(f"pid:{os.getpid()} 验证码自动预测为：{code}")
+            # print(f"pid:{os.getpid()} 验证码自动预测为：{code}")
 
         else:
             code = input("输入验证码:\n")
@@ -334,7 +335,8 @@ class Elective(Network):
                          headers=Const.supplement_header)
 
         if post["valid"] == '2':
-            print(f"pid:{os.getpid()} 验证码正确！")
+            # print(f"pid:{os.getpid()} 验证码正确！")
+            pass
         else:
             print(f"pid:{os.getpid()} 验证码错误，重新输入:\n")
             self.get_verify(index)
@@ -443,7 +445,5 @@ if __name__ == "__main__":
     names = ["中华人民共和国对外关系", "应用数理统计方法", "社会学概论"]
     # names = ["信息系统分析与设计", "复杂网络理论与实践"]
     # names = ["实用英语：从听说到演讲"]
-
     multiprocess(names, auto_mode=True, auto_verify=True)
-
     # select(auto_mode=False, auto_verify=True)
