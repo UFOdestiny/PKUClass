@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# @Name     : PKUClass.py
+# @Name     : PKUClass v1.1.py
 # @Date     : 2022/9/4 10:48
 # @Auth     : UFOdestiny
 # @Desc     :
@@ -46,8 +46,14 @@ class Static:
 
     refresh_limit = "https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/supplement/refreshLimit.do"
 
+    username = User.username
+    password = User.password
 
-class PKUClass(User, Static):
+    supplement_header = {
+        "Referer": f"https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do?xh={username}"}
+
+
+class PKUClass(Static):
 
     def __init__(self, course_name=None, auto_mode=False, auto_verify=False):
         """
@@ -55,10 +61,6 @@ class PKUClass(User, Static):
         :param auto_mode: 自动模式
         :param auto_verify: 自动验证码模式
         """
-
-        self.supplement_header = {
-            "Referer": f"https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do?xh={self.username}"}
-
         self.start_time = time.time()  # 记录开始时间
         self.end = None  # 结束符
         self.result = None  # 存放课程信息
