@@ -4,7 +4,6 @@
 # @Auth     : UFOdestiny
 # @Desc     :
 
-from Config import User
 import os
 import random
 import time
@@ -16,6 +15,7 @@ from requests.adapters import HTTPAdapter, Retry
 from requests.utils import dict_from_cookiejar
 
 from Verify import TuJian
+from Config import User
 
 os.environ['no_proxy'] = '*'
 
