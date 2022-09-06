@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# @Name     : PKUClass v1.2.py
+# @Name     : PKUClass.py
 # @Date     : 2022/9/6 10:33
 # @Auth     : UFOdestiny
 # @Desc     :
