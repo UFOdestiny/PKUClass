@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# @Name     : PKUClass.py
-# @Date     : 2022/9/4 10:48
+# @Name     : PKUClassUncouple.py
+# @Date     : 2022/9/6 10:33
 # @Auth     : UFOdestiny
 # @Desc     :
 
@@ -20,7 +20,7 @@ from Verify import TuJian
 os.environ['no_proxy'] = '*'
 
 
-class Static:
+class Const:
     headers = {
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1", }
 
@@ -46,42 +46,18 @@ class Static:
 
     refresh_limit = "https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/supplement/refreshLimit.do"
 
+    username = User.username
+    password = User.password
 
-class PKUClass(User, Static):
+    supplement_header = {
+        "Referer": f"https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do?xh={username}"}
 
-    def __init__(self, course_name=None, auto_mode=False, auto_verify=False):
-        """
-        :param course_name: 课程名
-        :param auto_mode: 自动模式
-        :param auto_verify: 自动验证码模式
-        """
+    session = requests.session()
+    session.mount('https://', HTTPAdapter(max_retries=Retry(total=5, allowed_methods=frozenset(['GET', 'POST']))))
+    cookie = None
 
-        self.supplement_header = {
-            "Referer": f"https://elective.pku.edu.cn/elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do?xh={self.username}"}
 
-        self.start_time = time.time()  # 记录开始时间
-        self.end = None  # 结束符
-        self.result = None  # 存放课程信息
-        self.action = None  # 存放行动（补选/刷新）
-        self.token = None  # IAAA验证token
-
-        self.session = requests.session()  # 生成session
-        self.session.mount('https://', HTTPAdapter(
-            max_retries=Retry(total=5, allowed_methods=frozenset(['GET', 'POST']))))  # 重试
-
-        self.cookie = None
-        self.index = None  # 手动输入时的标号
-
-        self.raw_pages = []  # 原始html
-        self.table_header = None  # 表头
-        self.auto_mode = auto_mode
-
-        self.auto_verify = auto_verify
-        if self.auto_verify:
-            self.verifier = TuJian()
-
-        self.course_name = course_name
-
+class Network:
     def request(self, method, url, raw=False, headers=None, **kwargs):
         """
         请求函数
@@ -93,14 +69,14 @@ class PKUClass(User, Static):
         :return:
         """
 
-        header = self.headers
+        header = Const.headers
         if headers:
             headers.update(header)
 
-        if self.session:
-            resp = self.session.request(method, url, headers=header, **kwargs)
+        if Const.session:
+            resp = Const.session.request(method, url, headers=header, **kwargs)
         else:
-            resp = requests.request(method, url, headers=headers, cookies=self.cookie, **kwargs)
+            resp = requests.request(method, url, headers=headers, cookies=Const.cookie, **kwargs)
 
         if not resp.ok:
             raise Exception(resp.status_code)
@@ -140,46 +116,56 @@ class PKUClass(User, Static):
 
         return self.request('GET', url, params=params, raw=raw, **kwargs)
 
+
+class Login(Network):
+    def __init__(self, print_table_flag=True):
+        super().__init__()
+        self.table_header = None
+        self.action = None
+        self.result = None
+        self.token = None
+        self.raw_pages = []
+        self.print_table_flag = print_table_flag
+
     def login_portal(self):
         """
         获取token
         :return:
         """
         data = {'appid': 'syllabus',  # 选课网
-                'userName': self.username,
-                'password': self.password,
+                'userName': Const.username,
+                'password': Const.password,
                 'randCode': "",
                 'smsCode': "",
                 'otpCode': "",
-                'redirUrl': self.redirUrl, }
+                'redirUrl': Const.redirUrl, }
 
-        resp_json = self.post(self.auth_url, data=data)
+        resp_json = self.post(Const.auth_url, data=data)
         self.token = resp_json.get('token')
 
     def login_elective(self):
-
-        sso_login = self.get(self.ssoLogin,
+        sso_login = self.get(Const.ssoLogin,
                              params={'_rand': random.random(), 'token': self.token},
                              allow_redirects=False)
 
-        self.cookie = {"Hm_lvt_c7896bb34c3be32ea17322b5412545c0": "1661775435",
-                       "JSESSIONID": dict_from_cookiejar(sso_login.cookies)["JSESSIONID"]}
+        Const.cookie = {"Hm_lvt_c7896bb34c3be32ea17322b5412545c0": "1661775435",
+                        "JSESSIONID": dict_from_cookiejar(sso_login.cookies)["JSESSIONID"]}
 
-        self.get(self.HelpController, allow_redirects=False)
+        self.get(Const.HelpController, allow_redirects=False)
 
-        self.cookie["route"] = dict_from_cookiejar(self.session.cookies)["route"]
+        Const.cookie["route"] = dict_from_cookiejar(Const.session.cookies)["route"]
 
         # 删除session
-        self.session = None
+        Const.session = None
         print(f"pid:{os.getpid()} 登陆成功！")
 
-    def SupplyCancel(self):
+    def get_SupplyCancel(self):
         """
         补退选页面
         :return:
         """
-        resp = self.get(self.SupplyCancel_url, params={"xh": self.username},
-                        headers=self.SupplyCancel_header, )
+        resp = self.get(Const.SupplyCancel_url, params={"xh": Const.username},
+                        headers=Const.SupplyCancel_header, )
 
         self.raw_pages.append(resp.text)
 
@@ -196,9 +182,9 @@ class PKUClass(User, Static):
 
         if page_total_number > 1:
             for page_number in range(2, min(page_total_number + 1, limit + 1)):
-                raw_page = self.get(self.supplement,
+                raw_page = self.get(Const.supplement,
                                     params={'netui_row': f'electableListGrid;{20 * (page_number - 1)}'},
-                                    headers=self.supplement_header,
+                                    headers=Const.supplement_header,
                                     )
                 self.raw_pages.append(raw_page.text)
 
@@ -252,19 +238,49 @@ class PKUClass(User, Static):
             print(fmt.format(i, self.result[0][i], self.result[4][i], self.result[-2][i], self.result[-1][i],
                              chr(12288)))
 
+    def run(self):
+        self.login_portal()
+        self.login_elective()
+        self.get_SupplyCancel()
+        self.get_supplement()
+        self.table()
+        if self.print_table_flag:
+            self.print_table()
+
+        return self.result, self.action
+
+
+class Elective(Network):
+    def __init__(self, course_name=None, auto_mode=False, auto_verify=False):
+        super().__init__()
+
+        login = Login(print_table_flag=not auto_mode)
+
+        self.result, self.action = login.run()
+        del login
+        self.auto_mode = auto_mode
+
+        self.auto_verify = auto_verify
+        if self.auto_verify:
+            self.verifier = TuJian()
+
+        self.course_name = course_name
+        self.index = None
+        self.end = False
+
     def manipulate(self, obj):
         """
         进行操作
         :param obj: [操作类型（刷新/补选）, 操作链接, 序号]
         :return:
         """
-        action_link = self.domain + obj[1]
+        action_link = Const.domain + obj[1]
         if obj[0] == "刷新":
             self.refresh(obj[2])
         self.get_verify(obj[2])
         self.select(action_link)
 
-    def get_input(self):
+    def manual(self):
         """
         手动输入
         :return:
@@ -284,8 +300,8 @@ class PKUClass(User, Static):
             index = self.index
 
         rand = 10000 * random.random()
-        resp = self.get(self.verify_image, params={"Rand": rand},
-                        headers=self.supplement_header)
+        resp = self.get(Const.verify_image, params={"Rand": rand},
+                        headers=Const.supplement_header)
 
         path = f"{index}.png"
         with open(path, 'wb') as file:
@@ -299,9 +315,9 @@ class PKUClass(User, Static):
         else:
             code = input("输入验证码:\n")
 
-        post = self.post(url=self.validate,
-                         data={"xh": self.username, "validCode": code},
-                         headers=self.supplement_header)
+        post = self.post(url=Const.validate,
+                         data={"xh": Const.username, "validCode": code},
+                         headers=Const.supplement_header)
 
         if post["valid"] == '2':
             print(f"pid:{os.getpid()} 验证码正确！")
@@ -316,7 +332,7 @@ class PKUClass(User, Static):
         :return:
         """
 
-        resp = self.get(link, headers=self.supplement_header)
+        resp = self.get(link, headers=Const.supplement_header)
 
         xpath = "(//*[@id='msgTips'])[1]//text()"
         msgs = HTML(resp.text).xpath(xpath)
@@ -335,16 +351,16 @@ class PKUClass(User, Static):
         """
         if not index:
             index = self.index
-        url = self.domain + self.action[index]
+        url = Const.domain + self.action[index]
         parse = url.split('?')[1].split('&')
         data = {
             "index": f"{parse[0].split('=')[1]}",
-            "xh": f"{self.username}",
+            "xh": f"{Const.username}",
             "seq": f"{parse[2].split('=')[1]}",
         }
         start = 20 * int(data["index"]) // 20
-        resp = self.post(self.refresh_limit, data=data,
-                         headers={"Referer": self.supplement + f"?netui_row=electableListGrid%3B{start}"})
+        resp = self.post(Const.refresh_limit, data=data,
+                         headers={"Referer": Const.supplement + f"?netui_row=electableListGrid%3B{start}"})
 
         if resp['electedNum'] == resp['limitNum']:
             print(f"pid:{os.getpid()} 没有空余名额！")
@@ -365,32 +381,18 @@ class PKUClass(User, Static):
             if self.result[0][index] == self.course_name:
                 self.manipulate([self.result[-1][index], self.action[index], index])
                 if self.end:
-                    print(f"pid:{os.getpid()} {time.time() - self.start_time}")
                     return
-                else:
-                    self.raw_pages = []
-                    self.SupplyCancel()
-                    self.get_supplement()
-                    self.table()
-
-                    self.locate()
 
     def run(self):
         """
         运行
         :return:
         """
-        self.login_portal()
-        self.login_elective()
-        self.SupplyCancel()
-        self.get_supplement()
-        self.table()
 
         if self.auto_mode:
             self.locate()
         else:
-            self.print_table()
-            self.get_input()
+            self.manual()
 
 
 def select(course_name=None, auto_mode=True, auto_verify=True):
@@ -400,7 +402,7 @@ def select(course_name=None, auto_mode=True, auto_verify=True):
     :param course_name: 课程名
     :return:
     """
-    PKUClass(course_name=course_name,
+    Elective(course_name=course_name,
              auto_mode=auto_mode,
              auto_verify=auto_verify).run()
 
