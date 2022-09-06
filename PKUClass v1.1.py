@@ -432,6 +432,6 @@ if __name__ == "__main__":
     # names = ["信息系统分析与设计", "复杂网络理论与实践"]
     names = ["实用英语：从听说到演讲", "社会学概论"]
 
-    multiprocess(names, auto_mode=True, auto_verify=True)
+    # multiprocess(names, auto_mode=True, auto_verify=True)
 
-    # select(auto_mode=False, auto_verify=True)
+    select("中华人民共和国对外关系", auto_mode=True, auto_verify=True)

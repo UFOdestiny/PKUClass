@@ -168,7 +168,7 @@ class Login(Network):
         resp = self.get(Const.SupplyCancel_url, params={"xh": Const.username},
                         headers=Const.SupplyCancel_header, )
 
-        self.raw_pages.append(resp.text)
+        self.raw_pages = [resp.text]
 
     def get_supplement(self, limit=100):
         """
@@ -210,11 +210,10 @@ class Login(Network):
                     a = [j for j in table[i]][0]
                     self.result[position].append([i for i in a][0].text)
                 elif position != 10:
-
-                    if table[i][0].text:
-                        self.result[position].append(table[i][0].text)
-                    else:  # 可能会有空
-                        self.result[position].append("空")
+                    content = table[i][0].text
+                    if content is None:  # 可能有空
+                        content = "空"
+                    self.result[position].append(content)
                 else:
                     a = [j for j in table[i]][0]
                     self.result[position].append([i for i in a][0].text)
@@ -238,25 +237,26 @@ class Login(Network):
             print(fmt.format(i, self.result[0][i], self.result[4][i], self.result[-2][i], self.result[-1][i],
                              chr(12288)))
 
-    def run(self):
-        self.login_portal()
-        self.login_elective()
+    def initialize(self):
         self.get_SupplyCancel()
         self.get_supplement()
         self.table()
+
         if self.print_table_flag:
             self.print_table()
 
         return self.result, self.action
 
+    def run(self):
+        self.login_portal()
+        self.login_elective()
+
+        return self.initialize()
+
 
 class Elective(Network):
     def __init__(self, course_name=None, auto_mode=False, auto_verify=False):
         super().__init__()
-
-        login = Login(print_table_flag=not auto_mode)
-        self.result, self.action = login.run()
-        del login
 
         self.auto_mode = auto_mode
 
@@ -267,6 +267,20 @@ class Elective(Network):
         self.course_name = course_name
         self.index = None
         self.end = False
+
+        self.result = None
+        self.action = None
+
+        self.cache = None
+        self.elective_initialize()
+
+    def elective_initialize(self):
+        login = Login(print_table_flag=not self.auto_mode)
+        self.result, self.action = login.run()
+        self.cache = login
+
+    def re_initialize(self):
+        self.result, self.action = self.cache.initialize()
 
     def manipulate(self, obj):
         """
@@ -338,10 +352,9 @@ class Elective(Network):
         msgs = HTML(resp.text).xpath(xpath)
         msg = [i.strip() for i in msgs if len(i.strip()) > 2][0]
 
-        print(f"pid:{os.getpid()} 结束:{msg}")
-        # if "成功" in msg:
-        #     self.end = True
-        self.end = True
+        print(f"pid:{os.getpid()} {msg}")
+        if "成功" in msg:
+            self.end = True
 
     def refresh(self, index=None, sleep=3):
         """
@@ -378,15 +391,16 @@ class Elective(Network):
         for index in range(len(self.result[0])):
             if self.result[0][index] == self.course_name:
                 self.manipulate([self.result[-1][index], self.action[index], index])
-                if self.end:
-                    return
+
+                if not self.end:
+                    self.re_initialize()
+                    self.locate()
 
     def run(self):
         """
         运行
         :return:
         """
-
         if self.auto_mode:
             self.locate()
         else:
@@ -426,9 +440,9 @@ def multiprocess(name_list, auto_mode=True, auto_verify=True):
 
 
 if __name__ == "__main__":
-    # names = ["中华人民共和国对外关系"]
+    names = ["中华人民共和国对外关系", "应用数理统计方法", "社会学概论"]
     # names = ["信息系统分析与设计", "复杂网络理论与实践"]
-    names = ["实用英语：从听说到演讲", "社会学概论"]
+    # names = ["实用英语：从听说到演讲"]
 
     multiprocess(names, auto_mode=True, auto_verify=True)
 
