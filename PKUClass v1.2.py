@@ -255,9 +255,9 @@ class Elective(Network):
         super().__init__()
 
         login = Login(print_table_flag=not auto_mode)
-
         self.result, self.action = login.run()
         del login
+
         self.auto_mode = auto_mode
 
         self.auto_verify = auto_verify
@@ -339,8 +339,9 @@ class Elective(Network):
         msg = [i.strip() for i in msgs if len(i.strip()) > 2][0]
 
         print(f"pid:{os.getpid()} 结束:{msg}")
-        if "成功" in msg:
-            self.end = True
+        # if "成功" in msg:
+        #     self.end = True
+        self.end = True
 
     def refresh(self, index=None, sleep=3):
         """
