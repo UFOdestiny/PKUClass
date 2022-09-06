@@ -4,19 +4,20 @@
 # @Auth     : UFOdestiny
 # @Desc     :
 
-from Config import User
 import os
 import random
 import time
 from multiprocessing import Process
 
-import requests
 from lxml.etree import HTML
+import requests
 from requests.adapters import HTTPAdapter, Retry
 from requests.utils import dict_from_cookiejar
 
+from Config import User
 from Verify import TuJian
 
+# 去除代理
 os.environ['no_proxy'] = '*'
 
 
@@ -209,7 +210,11 @@ class Login(Network):
                     a = [j for j in table[i]][0]
                     self.result[position].append([i for i in a][0].text)
                 elif position != 10:
-                    self.result[position].append(table[i][0].text)
+
+                    if table[i][0].text:
+                        self.result[position].append(table[i][0].text)
+                    else:  # 可能会有空
+                        self.result[position].append("空")
                 else:
                     a = [j for j in table[i]][0]
                     self.result[position].append([i for i in a][0].text)
@@ -220,11 +225,6 @@ class Login(Network):
         控制台打印表格
         :return:
         """
-        for column in self.result:
-            for ind in range(len(column)):
-                if column[ind] is None:
-                    column[ind] = "空"
-
         # ["课程名","课程类别","学分","周学时","教师","班号","开课单位","年级","上课/考试信息","限选/已选","补选"]
         fmt = "{0:<1}\t{1:{5}<8}\t{2:{5}<10}\t{3:{5}<5}\t{4}"
         length = len(self.result[0])
@@ -310,7 +310,7 @@ class Elective(Network):
         if self.auto_verify:
             code = self.verifier.check(path)
 
-            print(f"pid:{os.getpid()} 自动预测为：{code}")
+            print(f"pid:{os.getpid()} 验证码自动预测为：{code}")
 
         else:
             code = input("输入验证码:\n")
@@ -375,9 +375,6 @@ class Elective(Network):
         定位
         :return:
         """
-        # names = ["中华人民共和国对外关系", "社会学概论"]
-        # names = ["信息系统分析与设计", "复杂网络理论与实践"]
-
         for index in range(len(self.result[0])):
             if self.result[0][index] == self.course_name:
                 self.manipulate([self.result[-1][index], self.action[index], index])
