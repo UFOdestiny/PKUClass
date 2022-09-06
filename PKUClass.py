@@ -399,7 +399,7 @@ def select(course_name):
              auto_verify=True).run()
 
 
-if __name__ == "__main__":
+def multiprocess():
     # name_list = ["信息系统分析与设计", "复杂网络理论与实践"]
     name_list = ["实用英语：从听说到演讲", "社会学概论"]
     stat_time = time.time()
@@ -415,4 +415,8 @@ if __name__ == "__main__":
 
     print(f"total time:{time.time() - stat_time}")
 
-    # PKUClass(auto_mode=False, auto_verify=False).run()
+
+if __name__ == "__main__":
+    multiprocess()
+
+    # PKUClass(auto_mode=False, auto_verify=True).run()
