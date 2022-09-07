@@ -62,6 +62,7 @@ class Const:
     # session.mount('http://', HTTPAdapter(max_retries=Retry(total=2, allowed_methods=frozenset(['GET', 'POST']))))
     # session.mount('https://', HTTPAdapter(max_retries=Retry(total=2, allowed_methods=frozenset(['GET', 'POST']))))
     cookie = None
+    pid = os.getpid()
 
 
 class Network:
@@ -91,7 +92,7 @@ class Network:
         except requests.exceptions.ReadTimeout:
             self.retry -= 1
             if self.retry:
-                print(f"pid:{os.getpid()} 登陆失败！重试——→{self.retry}")
+                print(f"pid:{Const.pid} 登陆失败！重试——→{self.retry}")
                 resp = self.request(method, url, raw=True, headers=None, **kwargs)
 
         self.retry = 10
@@ -144,7 +145,7 @@ class Login(Network):
         self.raw_pages = []
         self.print_table_flag = print_table_flag
 
-        self.logger = Logger(file_name=f"{os.getpid()}", mode="file")
+        self.logger = Logger(file_name=f"{Const.pid}", mode="file")
 
     def login_portal(self):
         """
@@ -176,8 +177,8 @@ class Login(Network):
 
         # 删除session
         Const.session = None
-        self.logger.info(f"pid:{os.getpid()} 登陆成功！")
-        print(f"pid:{os.getpid()} 登陆成功！")
+        self.logger.info(f"pid:{Const.pid} 登陆成功！")
+        print(f"pid:{Const.pid} 登陆成功！")
 
     def get_SupplyCancel(self):
         """
@@ -271,12 +272,12 @@ class Login(Network):
     def re_login(self):
         wrong = False
         if "目前是跨院系选课数据准备时间" in self.raw_pages[0]:
-            self.logger.info(f"pid:{os.getpid()} 目前是跨院系选课数据准备时间！")
-            print(f"pid:{os.getpid()} 目前是跨院系选课数据准备时间！")
+            self.logger.info(f"pid:{Const.pid} 目前是跨院系选课数据准备时间！")
+            print(f"pid:{Const.pid} 目前是跨院系选课数据准备时间！")
             wrong = True
         elif "您尚未登录或者会话超时" in self.raw_pages[0]:
-            self.logger.info(f"pid:{os.getpid()} 会话超时！重试！")
-            print(f"pid:{os.getpid()} 会话超时！重试！")
+            self.logger.info(f"pid:{Const.pid} 会话超时！重试！")
+            print(f"pid:{Const.pid} 会话超时！重试！")
             wrong = True
 
         if wrong:
@@ -313,7 +314,7 @@ class Elective(Network):
         self.cache = None
         self.elective_initialize()
 
-        self.logger = Logger(file_name=f"{os.getpid()}", mode="file")
+        self.logger = Logger(file_name=f"{Const.pid}", mode="file")
 
     def elective_initialize(self):
         login = Login(print_table_flag=not self.auto_mode)
@@ -361,13 +362,13 @@ class Elective(Network):
         resp = self.get(Const.verify_image, params={"Rand": rand},
                         headers=Const.s_h)
 
-        path = f"{CaptchaSetting.path}/{os.getpid()}:{self.course_name}.png"
+        path = f"{CaptchaSetting.path}/{Const.pid}:{self.course_name}.png"
         with open(path, 'wb') as file:
             file.write(resp.content)
 
         if self.auto_verify:
             code = self.verifier.check(path)
-            # print(f"pid:{os.getpid()} 验证码自动预测为：{code}")
+            # print(f"pid:{Const.pid} 验证码自动预测为：{code}")
 
         else:
             code = input("输入验证码:")
@@ -377,11 +378,11 @@ class Elective(Network):
                          headers=Const.s_h)
 
         if post["valid"] == '2':
-            # print(f"pid:{os.getpid()} 验证码正确！")
+            # print(f"pid:{Const.pid} 验证码正确！")
             pass
         else:
-            self.logger.info(f"pid:{os.getpid()} 验证码错误，重新输入:\n")
-            print(f"pid:{os.getpid()} 验证码错误，重新输入:\n")
+            self.logger.info(f"pid:{Const.pid} 验证码错误，重新输入:\n")
+            print(f"pid:{Const.pid} 验证码错误，重新输入:\n")
             self.get_verify(index, retry - 1)
 
     def select(self, link):
@@ -397,8 +398,8 @@ class Elective(Network):
         msgs = HTML(resp.text).xpath(xpath)
         msg = [i.strip() for i in msgs if len(i.strip()) > 2][0]
 
-        self.logger.info(f"pid:{os.getpid()} {self.course_name} {msg}")
-        print(f"pid:{os.getpid()} {self.course_name} {msg}")
+        self.logger.info(f"pid:{Const.pid} {self.course_name} {msg}")
+        print(f"pid:{Const.pid} {self.course_name} {msg}")
         if "成功" in msg:
             self.end = True
 
@@ -424,17 +425,17 @@ class Elective(Network):
 
         if 'electedNum' in resp and 'limitNum' in resp:
             if resp['electedNum'] == resp['limitNum']:
-                self.logger.info(f"pid:{os.getpid()} {self.course_name} 没有空余名额！")
-                print(f"pid:{os.getpid()} {self.course_name} 没有空余名额！")
+                self.logger.info(f"pid:{Const.pid} {self.course_name} 没有空余名额！")
+                print(f"pid:{Const.pid} {self.course_name} 没有空余名额！")
 
                 time.sleep(sleep)
                 self.refresh(index=index, sleep=sleep)
             else:
-                self.logger.info(f"pid:{os.getpid()} {self.course_name} 有空余名额！")
-                print(f"pid:{os.getpid()} {self.course_name} 有空余名额！")
+                self.logger.info(f"pid:{Const.pid} {self.course_name} 有空余名额！")
+                print(f"pid:{Const.pid} {self.course_name} 有空余名额！")
         else:
-            self.logger.info(f"pid:{os.getpid()} {self.course_name} 出现错误！")
-            print(f"pid:{os.getpid()} {self.course_name} 出现错误！")
+            self.logger.info(f"pid:{Const.pid} {self.course_name} 出现错误！")
+            print(f"pid:{Const.pid} {self.course_name} 出现错误！")
 
             time.sleep(sleep)
             self.refresh(index=index, sleep=sleep)
@@ -504,7 +505,7 @@ def multiprocess(name_list, auto_mode=True, auto_verify=True):
 
 
 if __name__ == "__main__":
-    names = ["社会学概论"]
+    names = ["社会学概论", "实用英语：从听说到演讲"]
     # names = ["信息系统分析与设计", "复杂网络理论与实践"]
     # names = ["实用英语：从听说到演讲"]
     multiprocess(names, auto_mode=True, auto_verify=True)
