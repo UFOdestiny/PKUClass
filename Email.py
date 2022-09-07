@@ -17,9 +17,12 @@ os.environ['no_proxy'] = '*'
 
 
 class QQMail(Email):
-    def __init__(self):
+    def __init__(self, receiver=None):
         self._name = self._getName()
         self._smtp = self._connect()
+
+        if receiver is not None:
+            self._receivers.extend(receiver)
 
     def _getName(self):
         hostname = socket.gethostname()
@@ -60,4 +63,4 @@ class QQMail(Email):
 
 if __name__ == "__main__":
     qq = QQMail()
-    qq.send(msg="王哥我真的好喜欢你啊！你可以跟我交往吗？")
+    qq.send(msg="梁宝梁宝我爱你，爱你就像小虾米！")

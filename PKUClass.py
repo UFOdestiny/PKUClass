@@ -432,8 +432,8 @@ class Elective(Network):
                     self.re_initialize()
                     self.locate()
                 else:
-                    email = QQMail()
-                    email.send("选课成功！")
+                    email = QQMail([f"{Const.username}@pku.edu.cn"])
+                    email.send(f"{self.course_name} 选课成功！")
 
                 return
 
