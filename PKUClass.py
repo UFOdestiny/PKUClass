@@ -6,6 +6,7 @@
 # @Desc     :
 
 import os
+import sys
 import random
 import time
 from multiprocessing import Process
@@ -46,8 +47,12 @@ class Const:
 
     refresh_limit = f"{domain}elective2008/edu/pku/stu/elective/controller/supplement/refreshLimit.do"
 
-    username = User.username
-    password = User.password
+    if len(sys.argv) == 3:
+        username = sys.argv[1]
+        password = sys.argv[2]
+    else:
+        username = User.username
+        password = User.password
 
     s_h = {'Referer': f"{domain}elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do?xh={username}"}
 
@@ -473,5 +478,5 @@ if __name__ == "__main__":
     names = ["中华人民共和国对外关系", "应用数理统计方法", "社会学概论"]
     # names = ["信息系统分析与设计", "复杂网络理论与实践"]
     # names = ["实用英语：从听说到演讲"]
-    # multiprocess(names, auto_mode=True, auto_verify=True)
-    select(auto_mode=False, auto_verify=True)
+    multiprocess(names, auto_mode=True, auto_verify=True)
+    # select(auto_mode=False, auto_verify=True)
