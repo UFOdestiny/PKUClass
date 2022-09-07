@@ -259,8 +259,15 @@ class Login(Network):
         return self.result, self.action
 
     def re_login(self):
-        if "您尚未登录或者会话超时" in self.raw_pages[0]:
+        wrong = False
+        if "目前是跨院系选课数据准备时间" in self.raw_pages[0]:
+            print(f"pid:{os.getpid()} 目前是跨院系选课数据准备时间！")
+            wrong = True
+        elif "您尚未登录或者会话超时" in self.raw_pages[0]:
             print(f"pid:{os.getpid()} 会话超时！重试！")
+            wrong = True
+
+        if wrong:
             Const.session = requests.session()
             self.login_portal()
             self.login_elective()
@@ -324,12 +331,15 @@ class Elective(Network):
             obj = [self.result[-1][self.index], self.action[self.index], self.index]
             self.manipulate(obj)
 
-    def get_verify(self, index=None):
+    def get_verify(self, index=None, retry=10):
         """
         获取验证码
+        :param retry:
         :param index:
         :return:
         """
+        if retry == 0:
+            raise Exception("验证码自动识别出现了问题！")
         if not index:
             index = self.index
 
@@ -357,7 +367,7 @@ class Elective(Network):
             pass
         else:
             print(f"pid:{os.getpid()} 验证码错误，重新输入:\n")
-            self.get_verify(index)
+            self.get_verify(index, retry - 1)
 
     def select(self, link):
         """
@@ -412,9 +422,9 @@ class Elective(Network):
             if self.result[0][index] == self.course_name:
                 self.manipulate([self.result[-1][index], self.action[index], index])
 
-                # if not self.end:
-                #     self.re_initialize()
-                #     self.locate()
+                if not self.end:
+                    self.re_initialize()
+                    self.locate()
 
     def run(self):
         """
@@ -463,5 +473,5 @@ if __name__ == "__main__":
     names = ["中华人民共和国对外关系", "应用数理统计方法", "社会学概论"]
     # names = ["信息系统分析与设计", "复杂网络理论与实践"]
     # names = ["实用英语：从听说到演讲"]
-    multiprocess(names, auto_mode=True, auto_verify=True)
-    # select(auto_mode=False, auto_verify=True)
+    # multiprocess(names, auto_mode=True, auto_verify=True)
+    select(auto_mode=False, auto_verify=True)
