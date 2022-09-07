@@ -17,6 +17,7 @@ from requests.utils import dict_from_cookiejar
 
 from Config import User as User
 from Verify import TuJian
+from Email import QQMail
 
 # 去除代理
 os.environ['no_proxy'] = '*'
@@ -430,6 +431,9 @@ class Elective(Network):
                 if not self.end:
                     self.re_initialize()
                     self.locate()
+                else:
+                    email = QQMail()
+                    email.send("选课成功！")
 
     def run(self):
         """
