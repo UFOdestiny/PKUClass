@@ -463,6 +463,9 @@ def multiprocess(name_list, auto_mode=True, auto_verify=True):
     """
     stat_time = time.time()
     process_list = []
+    if len(sys.argv) >= 4:
+        name_list = sys.argv[3:]
+
     for name in name_list:
         p = Process(target=select, args=(name, auto_mode, auto_verify))
         p.start()
