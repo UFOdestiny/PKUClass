@@ -435,6 +435,8 @@ class Elective(Network):
                     email = QQMail()
                     email.send("选课成功！")
 
+                return
+
     def run(self):
         """
         运行

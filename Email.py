@@ -24,7 +24,7 @@ class QQMail(Email):
     def _getName(self):
         hostname = socket.gethostname()
         ip = requests.get('https://checkip.amazonaws.com').text.strip()
-        return f"{hostname}<{ip}@{hostname}>"
+        return f"{hostname}<{hostname}@{ip}>"
 
     def _connect(self):
         try:
