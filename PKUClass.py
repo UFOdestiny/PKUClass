@@ -15,9 +15,10 @@ import requests
 from lxml.etree import HTML
 from requests.utils import dict_from_cookiejar
 
-from Config import User as User
-from Verify import TuJian
+from Config import User, CaptchaSetting
+from Captcha import TuJian
 from Email import QQMail
+from Logger import Logger
 
 # 去除代理
 os.environ['no_proxy'] = '*'
@@ -48,12 +49,12 @@ class Const:
 
     refresh_limit = f"{domain}elective2008/edu/pku/stu/elective/controller/supplement/refreshLimit.do"
 
-    if len(sys.argv) == 3:
-        username = sys.argv[1]
-        password = sys.argv[2]
-    else:
+    if len(sys.argv) == 1:
         username = User.username
         password = User.password
+    else:
+        username = sys.argv[1]
+        password = sys.argv[2]
 
     s_h = {'Referer': f"{domain}elective2008/edu/pku/stu/elective/controller/supplement/SupplyCancel.do?xh={username}"}
 
@@ -64,7 +65,7 @@ class Const:
 
 
 class Network:
-    retry = 5
+    retry = 10
 
     def request(self, method, url, raw=False, headers=None, **kwargs):
         """
@@ -93,7 +94,7 @@ class Network:
                 print(f"pid:{os.getpid()} 登陆失败！重试——→{self.retry}")
                 resp = self.request(method, url, raw=True, headers=None, **kwargs)
 
-        self.retry = 5
+        self.retry = 10
         if not resp.ok:
             raise Exception(resp.status_code)
 
@@ -143,6 +144,8 @@ class Login(Network):
         self.raw_pages = []
         self.print_table_flag = print_table_flag
 
+        self.logger = Logger(file_name=f"{os.getpid()}", mode="file")
+
     def login_portal(self):
         """
         获取token
@@ -173,6 +176,7 @@ class Login(Network):
 
         # 删除session
         Const.session = None
+        self.logger.info(f"pid:{os.getpid()} 登陆成功！")
         print(f"pid:{os.getpid()} 登陆成功！")
 
     def get_SupplyCancel(self):
@@ -267,9 +271,11 @@ class Login(Network):
     def re_login(self):
         wrong = False
         if "目前是跨院系选课数据准备时间" in self.raw_pages[0]:
+            self.logger.info(f"pid:{os.getpid()} 目前是跨院系选课数据准备时间！")
             print(f"pid:{os.getpid()} 目前是跨院系选课数据准备时间！")
             wrong = True
         elif "您尚未登录或者会话超时" in self.raw_pages[0]:
+            self.logger.info(f"pid:{os.getpid()} 会话超时！重试！")
             print(f"pid:{os.getpid()} 会话超时！重试！")
             wrong = True
 
@@ -306,6 +312,8 @@ class Elective(Network):
 
         self.cache = None
         self.elective_initialize()
+
+        self.logger = Logger(file_name=f"{os.getpid()}", mode="file")
 
     def elective_initialize(self):
         login = Login(print_table_flag=not self.auto_mode)
@@ -353,7 +361,7 @@ class Elective(Network):
         resp = self.get(Const.verify_image, params={"Rand": rand},
                         headers=Const.s_h)
 
-        path = f"{index}.png"
+        path = f"{CaptchaSetting.path}/{os.getpid()}:{self.course_name}.png"
         with open(path, 'wb') as file:
             file.write(resp.content)
 
@@ -372,6 +380,7 @@ class Elective(Network):
             # print(f"pid:{os.getpid()} 验证码正确！")
             pass
         else:
+            self.logger.info(f"pid:{os.getpid()} 验证码错误，重新输入:\n")
             print(f"pid:{os.getpid()} 验证码错误，重新输入:\n")
             self.get_verify(index, retry - 1)
 
@@ -388,7 +397,8 @@ class Elective(Network):
         msgs = HTML(resp.text).xpath(xpath)
         msg = [i.strip() for i in msgs if len(i.strip()) > 2][0]
 
-        print(f"pid:{os.getpid()} {msg}")
+        self.logger.info(f"pid:{os.getpid()} {self.course_name} {msg}")
+        print(f"pid:{os.getpid()} {self.course_name} {msg}")
         if "成功" in msg:
             self.end = True
 
@@ -412,12 +422,22 @@ class Elective(Network):
         resp = self.post(Const.refresh_limit, data=data,
                          headers={"Referer": Const.supplement + f"?netui_row=electableListGrid%3B{start}"})
 
-        if resp['electedNum'] == resp['limitNum']:
-            print(f"pid:{os.getpid()} 没有空余名额！")
+        if 'electedNum' in resp and 'limitNum' in resp:
+            if resp['electedNum'] == resp['limitNum']:
+                self.logger.info(f"pid:{os.getpid()} {self.course_name} 没有空余名额！")
+                print(f"pid:{os.getpid()} {self.course_name} 没有空余名额！")
+
+                time.sleep(sleep)
+                self.refresh(index=index, sleep=sleep)
+            else:
+                self.logger.info(f"pid:{os.getpid()} {self.course_name} 有空余名额！")
+                print(f"pid:{os.getpid()} {self.course_name} 有空余名额！")
+        else:
+            self.logger.info(f"pid:{os.getpid()} {self.course_name} 出现错误！")
+            print(f"pid:{os.getpid()} {self.course_name} 出现错误！")
+
             time.sleep(sleep)
             self.refresh(index=index, sleep=sleep)
-        else:
-            print(f"pid:{os.getpid()} 有空余名额！")
 
     def locate(self):
         """
@@ -484,8 +504,8 @@ def multiprocess(name_list, auto_mode=True, auto_verify=True):
 
 
 if __name__ == "__main__":
-    names = ["中华人民共和国对外关系", "应用数理统计方法", "社会学概论"]
+    names = ["社会学概论"]
     # names = ["信息系统分析与设计", "复杂网络理论与实践"]
     # names = ["实用英语：从听说到演讲"]
     multiprocess(names, auto_mode=True, auto_verify=True)
-    # select(auto_mode=False, auto_verify=True)
+    # select(course_name="社会学概论", auto_mode=True, auto_verify=True)
