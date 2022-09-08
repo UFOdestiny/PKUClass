@@ -94,6 +94,8 @@ class Network:
             if self.retry:
                 print(f"pid:{Const.pid} 登陆失败！重试——→{self.retry}")
                 resp = self.request(method, url, raw=True, headers=None, **kwargs)
+            else:
+                raise Exception("登陆拉了")
 
         self.retry = 10
         if not resp.ok:
@@ -298,6 +300,7 @@ class Elective(Network):
     def __init__(self, course_name=None, auto_mode=False, auto_verify=False):
         super().__init__()
 
+        self.fresh = False
         self.auto_mode = auto_mode
 
         self.auto_verify = auto_verify
@@ -331,8 +334,13 @@ class Elective(Network):
         :return:
         """
         action_link = Const.domain + obj[1]
+
         if obj[0] == "刷新":
+            self.fresh = True
+
+        while self.fresh:
             self.refresh(obj[2])
+
         self.get_verify(obj[2])
         self.select(action_link)
 
@@ -403,11 +411,10 @@ class Elective(Network):
         if "成功" in msg:
             self.end = True
 
-    def refresh(self, index=None, sleep=3):
+    def refresh(self, index=None):
         """
         刷新
         :param index:
-        :param sleep: 休眠时间
         :return:
         """
         if not index:
@@ -427,18 +434,17 @@ class Elective(Network):
             if resp['electedNum'] == resp['limitNum']:
                 self.logger.info(f"pid:{Const.pid} {self.course_name} 没有空余名额！")
                 print(f"pid:{Const.pid} {self.course_name} 没有空余名额！")
-
-                time.sleep(sleep)
-                self.refresh(index=index, sleep=sleep)
+                self.fresh = True
+                time.sleep(3)
             else:
                 self.logger.info(f"pid:{Const.pid} {self.course_name} 有空余名额！")
                 print(f"pid:{Const.pid} {self.course_name} 有空余名额！")
+                self.fresh = False
         else:
             self.logger.info(f"pid:{Const.pid} {self.course_name} 出现错误！")
             print(f"pid:{Const.pid} {self.course_name} 出现错误！")
-
-            time.sleep(sleep)
-            self.refresh(index=index, sleep=sleep)
+            self.fresh = True
+            time.sleep(3)
 
     def locate(self):
         """
@@ -455,8 +461,6 @@ class Elective(Network):
                 else:
                     email = QQMail([f"{Const.username}@pku.edu.cn"])
                     email.send(f"{self.course_name} 选课成功！")
-
-                return
 
     def run(self):
         """
