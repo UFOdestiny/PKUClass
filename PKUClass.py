@@ -327,21 +327,23 @@ class Elective(Network):
     def re_initialize(self):
         self.result, self.action = self.cache.initialize()
 
-    def manipulate(self, obj):
+    def manipulate(self, index: int, link: str, action: str):
         """
         进行操作
-        :param obj: [操作类型（刷新/补选）, 操作链接, 序号]
+        :param action:
+        :param link:
+        :param index:
         :return:
         """
-        action_link = Const.domain + obj[1]
+        action_link = Const.domain + link
 
-        if obj[0] == "刷新":
+        if action == "刷新":
             self.fresh = True
 
         while self.fresh:
-            self.refresh(obj[2])
+            self.refresh(index)
 
-        self.get_verify(obj[2])
+        self.get_verify(index)
         self.select(action_link)
 
     def manual(self):
@@ -351,10 +353,11 @@ class Elective(Network):
         """
         while True:
             self.index = int(input())
-            obj = [self.result[-1][self.index], self.action[self.index], self.index]
-            self.manipulate(obj)
+            self.manipulate(index=self.index,
+                            link=self.action[self.index],
+                            action=self.result[-1][self.index])
 
-    def get_verify(self, index=None, retry=10):
+    def get_verify(self, index, retry=10):
         """
         获取验证码
         :param retry:
@@ -363,8 +366,6 @@ class Elective(Network):
         """
         if retry == 0:
             raise Exception("验证码自动识别出现了问题！")
-        if not index:
-            index = self.index
 
         rand = 10000 * random.random()
         resp = self.get(Const.verify_image, params={"Rand": rand},
@@ -411,7 +412,7 @@ class Elective(Network):
         if "成功" in msg:
             self.end = True
 
-    def refresh(self, index=None):
+    def refresh(self, index):
         """
         刷新
         :param index:
@@ -453,7 +454,7 @@ class Elective(Network):
         """
         for index in range(len(self.result[0])):
             if self.result[0][index] == self.course_name:
-                self.manipulate([self.result[-1][index], self.action[index], index])
+                self.manipulate(index=index, link=self.action[index], action=self.result[-1][index])
 
                 if not self.end:
                     self.re_initialize()
@@ -482,7 +483,7 @@ def select(course_name=None, auto_mode=True, auto_verify=True):
     """
     Elective(course_name=course_name,
              auto_mode=auto_mode,
-             auto_verify=auto_verify).run()
+             auto_verify=auto_verify, ).run()
 
 
 def multiprocess(name_list, auto_mode=True, auto_verify=True):
