@@ -180,7 +180,7 @@ class Login(Network):
         # 删除session
         Const.session = None
         self.logger.info(f"pid:{Const.pid} 登陆成功！")
-        print(f"pid:{Const.pid} 登陆成功！")
+        # print(f"pid:{Const.pid} 登陆成功！")
 
     def get_SupplyCancel(self):
         """
@@ -275,11 +275,11 @@ class Login(Network):
         wrong = False
         if "目前是跨院系选课数据准备时间" in self.raw_pages[0]:
             self.logger.info(f"pid:{Const.pid} 目前是跨院系选课数据准备时间！")
-            print(f"pid:{Const.pid} 目前是跨院系选课数据准备时间！")
+            # print(f"pid:{Const.pid} 目前是跨院系选课数据准备时间！")
             wrong = True
         elif "您尚未登录或者会话超时" in self.raw_pages[0]:
             self.logger.info(f"pid:{Const.pid} 会话超时！重试！")
-            print(f"pid:{Const.pid} 会话超时！重试！")
+            # print(f"pid:{Const.pid} 会话超时！重试！")
             wrong = True
 
         if wrong:
@@ -391,7 +391,7 @@ class Elective(Network):
             pass
         else:
             self.logger.info(f"pid:{Const.pid} 验证码错误，重新输入:\n")
-            print(f"pid:{Const.pid} 验证码错误，重新输入:\n")
+            # print(f"pid:{Const.pid} 验证码错误，重新输入:\n")
             self.get_verify(index, retry - 1)
 
     def select(self, link):
@@ -408,7 +408,7 @@ class Elective(Network):
         msg = [i.strip() for i in msgs if len(i.strip()) > 2][0]
 
         self.logger.info(f"pid:{Const.pid} {self.course_name} {msg}")
-        print(f"pid:{Const.pid} {self.course_name} {msg}")
+        # print(f"pid:{Const.pid} {self.course_name} {msg}")
         if "成功" in msg:
             self.end = True
 
@@ -434,16 +434,16 @@ class Elective(Network):
         if 'electedNum' in resp and 'limitNum' in resp:
             if resp['electedNum'] == resp['limitNum']:
                 self.logger.info(f"pid:{Const.pid} {self.course_name} 没有空余名额！")
-                print(f"pid:{Const.pid} {self.course_name} 没有空余名额！")
+                # print(f"pid:{Const.pid} {self.course_name} 没有空余名额！")
                 self.fresh = True
                 time.sleep(3)
             else:
                 self.logger.info(f"pid:{Const.pid} {self.course_name} 有空余名额！")
-                print(f"pid:{Const.pid} {self.course_name} 有空余名额！")
+                # print(f"pid:{Const.pid} {self.course_name} 有空余名额！")
                 self.fresh = False
         else:
             self.logger.info(f"pid:{Const.pid} {self.course_name} 出现错误！")
-            print(f"pid:{Const.pid} {self.course_name} 出现错误！")
+            # print(f"pid:{Const.pid} {self.course_name} 出现错误！")
             self.fresh = True
             time.sleep(3)
 
