@@ -82,6 +82,7 @@ class Elective(Network):
         """
         while True:
             self.index = int(input())
+
             self.manipulate(index=self.index,
                             link=self.action[self.index],
                             action=self.result[-1][self.index])
@@ -94,13 +95,17 @@ class Elective(Network):
         :return:
         """
         if retry == 0:
-            raise Exception("验证码自动识别出现了问题！")
+            raise Exception("验证码识别出现了问题！")
 
         rand = 10000 * random.random()
         resp = self.get(Const.verify_image, params={"Rand": rand},
                         headers=Const.s_h)
 
-        path = f"{CaptchaSetting.path}/{Const.pid}:{self.course_name}.png"
+        if self.course_name is None:
+            path = f"{CaptchaSetting.path}/{Const.pid} {index}.png"
+        else:
+            path = f"{CaptchaSetting.path}/{Const.pid} {self.course_name}.png"
+
         with open(path, 'wb') as file:
             file.write(resp.content)
 
@@ -239,9 +244,8 @@ def multiprocess(name_list, auto_mode=True, auto_verify=True):
 
 
 if __name__ == "__main__":
-    pass
     # names = ["实用英语：从听说到演讲"]
     # names = ["信息系统分析与设计", "复杂网络理论与实践"]
     # names = ["实用英语：从听说到演讲"]
     # multiprocess(names, auto_mode=True, auto_verify=True)
-    # select(course_name="社会学概论", auto_mode=True, auto_verify=True)
+    select(course_name="社会学概论", auto_mode=False, auto_verify=False)
