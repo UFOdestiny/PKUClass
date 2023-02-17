@@ -245,7 +245,6 @@ def multiprocess(name_list, auto_mode=True, auto_verify=True):
 
 if __name__ == "__main__":
     # names = ["实用英语：从听说到演讲"]
-    # names = ["信息系统分析与设计", "复杂网络理论与实践"]
-    # names = ["实用英语：从听说到演讲"]
-    # multiprocess(names, auto_mode=True, auto_verify=True)
-    select(course_name="社会学概论", auto_mode=False, auto_verify=False)
+    names = ["现代电子与通信导论", "论证性论文写作", "互联网认知"]
+    multiprocess(names, auto_mode=True, auto_verify=True)
+    # select(course_name="社会学概论", auto_mode=False, auto_verify=False)
