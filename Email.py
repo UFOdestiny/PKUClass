@@ -31,7 +31,7 @@ class QQMail(Email):
 
     def _connect(self):
         try:
-            smtp = smtplib.SMTP_SSL(host="smtp.qq.com", port=465)  # 采用加密协议的smtp服务器
+            smtp = smtplib.SMTP_SSL(host="smtp.qq.com", port=465)
             smtp.login(self._user, self._code)
             return smtp
         except socket.gaierror:

@@ -6,6 +6,7 @@
 # @Desc     : logger
 
 import logging
+from datetime import date
 
 from logging.handlers import TimedRotatingFileHandler
 from logging.handlers import RotatingFileHandler
@@ -20,12 +21,16 @@ class Singleton(type):
 
 
 class Logger(LogSetting, metaclass=Singleton):
-    def __init__(self, file_name="my", mode="all"):
+    def __init__(self, file_name="project", mode="all", path=""):
         self.LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
         self.logger = logging.getLogger(name=file_name)
         self.logger.setLevel(logging.DEBUG)
 
         self.file_name = f"{self.path}/{file_name}.log"
+
+        if path:
+            self.path = path
+            # print(self.path)
 
         if mode == "console":
             self.stand_mode()
@@ -56,15 +61,17 @@ class Logger(LogSetting, metaclass=Singleton):
         stand_handler.setFormatter(logging.Formatter(self.LOG_FORMAT))
         self.logger.addHandler(stand_handler)
 
-    def file_mode(self, mode="Rotating"):
+    def file_mode(self, mode="Time"):
         if mode == "Rotating":  # 输出到文件
             file_handler = RotatingFileHandler(filename=self.file_name, maxBytes=1048576 * 1,
                                                backupCount=10,
                                                encoding='utf-8')
 
         else:  # 按时间输出
-            file_handler = TimedRotatingFileHandler(filename="log/my.log", when="D", interval=7, backupCount=10,
-                                                    encoding='utf-8')
+
+            today = str(date.today())
+            file_handler = TimedRotatingFileHandler(filename=f"{self.path}/{today}.log",
+                                                    when="D", interval=1, backupCount=30, encoding='utf-8')
 
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(logging.Formatter(self.LOG_FORMAT))
