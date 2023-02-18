@@ -63,4 +63,4 @@ class QQMail(Email):
 
 if __name__ == "__main__":
     qq = QQMail()
-    qq.send(msg="梁宝梁宝我爱你，爱你就像小虾米！")
+    qq.send(msg="摸摸哒")

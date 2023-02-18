@@ -198,10 +198,6 @@ class Elective(Network):
                     email.send(f"{self.course_name} 选课成功！")
 
     def run(self):
-        """
-        运行
-        :return:
-        """
         if self.auto_mode:
             self.locate()
         else:
@@ -246,5 +242,5 @@ def multiprocess(name_list, auto_mode=True, auto_verify=True):
 if __name__ == "__main__":
     # names = ["实用英语：从听说到演讲"]
     names = ["现代电子与通信导论", "论证性论文写作", "互联网认知"]
-    multiprocess(names, auto_mode=True, auto_verify=True)
-    # select(course_name="社会学概论", auto_mode=False, auto_verify=False)
+    # multiprocess(names, auto_mode=True, auto_verify=True)
+    select(course_name="社会学概论", auto_mode=False, auto_verify=False)

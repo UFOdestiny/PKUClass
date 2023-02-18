@@ -1,34 +1,34 @@
 class User:
-    username = "1312314"
-    password = "31"
+    username = "1900016644"
+    password = "YUDAHAIhenniu123"
 
 
 class User2:
-    username = "1312310"
-    password = "2313"
+    username = "1900016630"
+    password = "cos(60*)"
 
 
 class User3:
-    username = "13131231"
-    password = "231"
+    username = "1900014548"
+    password = "ckxhero091411"
 
 
 class User4:
-    username = "12"
-    password = "132L"
+    username = "1900016606"
+    password = "7u5pk8bp9vLDL"
 
 
 class TuJianSetting:
-    uname = '12sy'
-    pwd = '12120'
+    uname = 'banksy'  # 'ckxhero'
+    pwd = 'whg8824780'  # 'ckxhero0914'
 
 
 class Email:
-    _user = "1120@qq.com"
-    _code = "1212i"
+    _user = "1976438440@qq.com"
+    _code = "yhtjbtylapjvjeji"
 
-    _sender = "120@qq.com"
-    _receivers = ["12@qq.com"]
+    _sender = "1976438440@qq.com"
+    _receivers = ["1976438440@qq.com"]  # "1542600601@qq.com"
 
 
 class LogSetting:
