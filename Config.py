@@ -19,7 +19,7 @@ class User4:
 
 
 class TuJianSetting:
-    uname = ''  # 图鉴账号和密码
+    uname = ''  #  图鉴账号和密码
     pwd = ''
 
 
