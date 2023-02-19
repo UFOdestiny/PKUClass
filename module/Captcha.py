@@ -12,7 +12,7 @@ class TuJian(TuJianSetting):
         self.typeid = 3
         self.cv = CvProcess()
 
-    def check(self, img, process=True):
+    def check(self, img, process=False):
         if process:
             self.cv.process(img)
 
@@ -67,14 +67,14 @@ class CvProcess:
 
 if __name__ == "__main__":
     t = TuJian()
-    img_path = r"D:\COURSE\program\python\pkuclass\captcha\1.jpg"
+    img_path = r"D:/COURSE/program/python/pkuclass/captcha/13184 2.png"
     print(t.check(img_path))
 
-    img_path = r"D:\COURSE\program\python\pkuclass\captcha\2.jpg"
-    print(t.check(img_path))
-
-    img_path = r"D:\COURSE\program\python\pkuclass\captcha\3.jpg"
-    print(t.check(img_path))
+    # img_path = r"D:\COURSE\program\python\pkuclass\captcha\2.jpg"
+    # print(t.check(img_path))
+    #
+    # img_path = r"D:\COURSE\program\python\pkuclass\captcha\3.jpg"
+    # print(t.check(img_path))
 
     # c = CvProcess()
     # c.process("captcha/1.png")

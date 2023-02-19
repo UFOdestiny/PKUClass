@@ -160,10 +160,10 @@ class Login(Network):
             # print(f"pid:{Const.pid} 会话超时！重试！")
             wrong = True
 
-        elif "该课程在补退选阶段开始后的约一周开放选课" in self.raw_pages[0]:
-            self.logger.info(f"pid:{Const.pid} 跨院系选课尚未开放！")
-            # print(f"pid:{Const.pid} 会话超时！重试！")
-            wrong = True
+        # elif "该课程在补退选阶段开始后的约一周开放选课" in self.raw_pages[0]:
+        #     self.logger.info(f"pid:{Const.pid} 跨院系选课尚未开放！")
+        #     # print(f"pid:{Const.pid} 会话超时！重试！")
+        #     wrong = True
 
         if wrong:
             Const.session = requests.session()

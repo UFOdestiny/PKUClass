@@ -103,9 +103,9 @@ class Elective(Network):
                         headers=Const.s_h)
 
         if self.course_name is None:
-            path = f"{CaptchaSetting.path}/{Const.pid} {index}.png"
+            path = f"{CaptchaSetting.path}/{Const.pid}-{index}.png"
         else:
-            path = f"{CaptchaSetting.path}/{Const.pid} {self.course_name}.png"
+            path = f"{CaptchaSetting.path}/{Const.pid}-{self.course_name}.png"
 
         with open(path, 'wb') as file:
             file.write(resp.content)
@@ -141,6 +141,9 @@ class Elective(Network):
         xpath = "(//*[@id='msgTips'])[1]//text()"
         msgs = HTML(resp.text).xpath(xpath)
         msg = [i.strip() for i in msgs if len(i.strip()) > 2][0]
+
+        if "该课程在补退选阶段开始后的约一周开放选课" in msg:
+            msg = "跨院系选课尚未开放！"
 
         self.logger.info(f"pid:{Const.pid} {self.course_name} {msg}")
         # print(f"pid:{Const.pid} {self.course_name} {msg}")
@@ -249,4 +252,4 @@ if __name__ == "__main__":
     # names = ["实用英语：从听说到演讲"]
     names = ["现代电子与通信导论", "论证性论文写作", "互联网认知"]
     # multiprocess(names, auto_mode=True, auto_verify=True)
-    select(auto_mode=False, auto_verify=False)
+    select(auto_mode=False, auto_verify=True)
