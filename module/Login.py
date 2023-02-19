@@ -9,9 +9,9 @@ import random
 import requests
 from requests.utils import dict_from_cookiejar
 
-from Const import Const
-from Logger import Logger
-from Network import Network
+from module.Const import Const
+from module.Logger import Logger
+from module.Network import Network
 from lxml.etree import HTML
 
 
@@ -155,8 +155,13 @@ class Login(Network):
             self.logger.info(f"pid:{Const.pid} 目前是跨院系选课数据准备时间！")
             # print(f"pid:{Const.pid} 目前是跨院系选课数据准备时间！")
             wrong = True
-        elif "您尚未登录或者会话超时" in self.raw_pages[0]:
+        elif "会话超时" in self.raw_pages[0]:
             self.logger.info(f"pid:{Const.pid} 会话超时！重试！")
+            # print(f"pid:{Const.pid} 会话超时！重试！")
+            wrong = True
+
+        elif "该课程在补退选阶段开始后的约一周开放选课" in self.raw_pages[0]:
+            self.logger.info(f"pid:{Const.pid} 跨院系选课尚未开放！")
             # print(f"pid:{Const.pid} 会话超时！重试！")
             wrong = True
 

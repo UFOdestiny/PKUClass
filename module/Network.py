@@ -6,7 +6,7 @@
 # @Desc     :
 import requests
 
-from Const import Const
+from module.Const import Const
 
 
 class Network:
