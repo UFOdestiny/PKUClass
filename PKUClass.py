@@ -200,6 +200,7 @@ class Elective(Network):
                         suffix = "stu.pku.edu.cn"
                     email = QQMail()  # [f"{Const.username}@{suffix}"]
                     email.send(f"{self.course_name} 选课成功！")
+                    self.logger.info(f"{self.course_name} 选课成功！")
 
     def run(self):
         if self.auto_mode:
