@@ -24,11 +24,11 @@ class TuJianSetting:
 
 
 class Email:
-    _user = "11@qq.com"
+    _user = ""
     _smtp = ""
 
-    _sender = "11@qq.com"
-    _receivers = ["11@qq.com"]
+    _sender = ""
+    _receivers = [""]
 
 
 class LogSetting:
