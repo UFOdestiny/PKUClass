@@ -25,7 +25,7 @@ class TuJianSetting:
 
 class Email:
     _user = "11111@qq.com"  # 开通qq邮箱的smtp功能，输入账号与smtp密码
-    _smtp = ""
+    _smtpcode = ""
 
     _sender = "1111@qq.com"  # 发送方
     _receivers = ["11111@qq.com"]  # 接受方
