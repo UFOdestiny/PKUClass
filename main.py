@@ -125,8 +125,11 @@ class Elective(Network):
             # print(f"pid:{Const.pid} 验证码正确！")
             pass
         else:
-            self.logger.info(f"pid:{Const.pid} 验证码错误，重新输入:\n")
-            # print(f"pid:{Const.pid} 验证码错误，重新输入:\n")
+            if self.auto_verify:
+                msg = f"pid:{Const.pid} 自动识别验证码错误，正在重试！"
+            else:
+                msg = f"pid:{Const.pid} 验证码错误，重新输入:\n"
+            self.logger.info(msg)
             self.get_verify(index, retry - 1)
 
     def select(self, link):
