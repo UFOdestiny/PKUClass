@@ -1,34 +1,34 @@
 class User:
-    username = "1900016644"
-    password = "YUDAHAIhenniu123"
+    username = "19000"  # 门户账号和密码
+    password = ""
 
 
 class User2:
-    username = "1900016630"
-    password = "cos(60*)"
+    username = ""
+    password = ""
 
 
 class User3:
-    username = "1900014548"
-    password = "ckxhero091411"
+    username = ""
+    password = ""
 
 
 class User4:
-    username = "1900016606"
-    password = "7u5pk8bp9vLDL"
+    username = ""
+    password = ""
 
 
 class TuJianSetting:
-    uname = 'banksy'  # 'ckxhero'
-    pwd = 'whg8824780'  # 'ckxhero0914'
+    uname = ''  # 图鉴账号和密码
+    pwd = ''
 
 
 class Email:
-    _user = "1976438440@qq.com"
-    _code = "yhtjbtylapjvjeji"
+    _user = "11111@qq.com"  # 开通qq邮箱的smtp功能，输入账号与smtp密码
+    _smtp = ""
 
-    _sender = "1976438440@qq.com"
-    _receivers = ["1976438440@qq.com"]  # "1542600601@qq.com"
+    _sender = "1111@qq.com"  # 发送方
+    _receivers = ["11111@qq.com"]  # 接受方
 
 
 class LogSetting:

@@ -194,7 +194,11 @@ class Elective(Network):
                     self.re_initialize()
                     self.locate()
                 else:
-                    email = QQMail([f"{Const.username}@pku.edu.cn"])
+                    if Const.username[0] == 1:
+                        suffix = "pku.edu.cn"
+                    else:
+                        suffix = "stu.pku.edu.cn"
+                    email = QQMail()  # [f"{Const.username}@{suffix}"]
                     email.send(f"{self.course_name} 选课成功！")
 
     def run(self):
