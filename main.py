@@ -14,7 +14,7 @@ from multiprocessing import Process
 from lxml.etree import HTML
 
 from module.Captcha import TuJian
-from Config import CaptchaSetting
+from config import CaptchaSetting
 from module.Const import Const
 from module.Email import QQMail
 from module.Logger import Logger

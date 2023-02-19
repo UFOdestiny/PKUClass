@@ -11,7 +11,7 @@ from email.header import Header
 import socket
 import requests
 import os
-from Config import Email
+from config import Email
 
 os.environ['no_proxy'] = '*'
 

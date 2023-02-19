@@ -9,7 +9,7 @@ import sys
 
 import requests
 
-from Config import User
+from config import User
 
 
 class Const:

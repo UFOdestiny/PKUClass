@@ -1,7 +1,7 @@
 import base64
 import json
 import requests
-from Config import TuJianSetting
+from config import TuJianSetting
 
 import cv2
 import numpy as np

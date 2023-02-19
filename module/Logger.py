@@ -10,7 +10,7 @@ from datetime import date
 
 from logging.handlers import TimedRotatingFileHandler
 from logging.handlers import RotatingFileHandler
-from Config import LogSetting
+from config import LogSetting
 
 
 class Singleton(type):
