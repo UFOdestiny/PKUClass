@@ -79,7 +79,7 @@ class Logger(LogSetting, metaclass=Singleton):
 
 
 if __name__ == '__main__':
-    log = Logger()
+    log = Logger(path="../log")
     log.debug("debug msg")
     log.info("info msg")
     log.warning("warning msg")
