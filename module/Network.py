@@ -33,7 +33,7 @@ class Network:
             else:
                 resp = requests.request(method, url, headers=headers, cookies=Const.cookie, timeout=3, **kwargs)
 
-        except requests.exceptions.ReadTimeout:
+        except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectTimeout):
             self.retry -= 1
             if self.retry:
                 print(f"pid:{Const.pid} 登陆失败！重试——→{self.retry}")
