@@ -153,7 +153,7 @@ class Login(Network):
     def re_login(self):
         wrong = False
         if "目前是跨院系选课数据准备时间" in self.raw_pages[0]:
-            self.logger.info(f"pid:{Const.pid} 目前是跨院系选课数据准备时间！重试...")
+            self.logger.info(f"pid:{Const.pid} 跨院系选课未开放！重试...")
             # print(f"pid:{Const.pid} 目前是跨院系选课数据准备时间！")
             wrong = True
         elif "会话超时" in self.raw_pages[0]:

@@ -53,6 +53,6 @@ def multiprocess(name_list, auto_mode=True, auto_verify=True):
 
 if __name__ == "__main__":
     # names = ["实用英语：从听说到演讲"]
-    names = ["现代电子与通信导论", "论证性论文写作", "互联网认知"]
+    names = ["论证性论文写作", "互联网认知", "现代电子与通信导论", ]
     multiprocess(names, auto_mode=True, auto_verify=True)
     # select(auto_mode=False, auto_verify=True)
