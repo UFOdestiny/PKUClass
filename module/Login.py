@@ -5,6 +5,7 @@
 # @Email    : yudahai@pku.edu.cn
 # @Desc     :
 import random
+import time
 
 import requests
 from requests.utils import dict_from_cookiejar
@@ -160,12 +161,9 @@ class Login(Network):
             # print(f"pid:{Const.pid} 会话超时！重试！")
             wrong = True
 
-        # elif "该课程在补退选阶段开始后的约一周开放选课" in self.raw_pages[0]:
-        #     self.logger.info(f"pid:{Const.pid} 跨院系选课尚未开放！")
-        #     # print(f"pid:{Const.pid} 会话超时！重试！")
-        #     wrong = True
-
         if wrong:
+            self.logger.info(f"pid:{Const.pid} 未进入页面，重试！")
+            time.sleep(3)
             Const.session = requests.session()
             self.login_portal()
             self.login_elective()
