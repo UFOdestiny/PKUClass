@@ -10,7 +10,7 @@ from module.Const import Const
 
 
 class Network:
-    retry = 10
+    retry = 20
 
     def request(self, method, url, raw=False, headers=None, **kwargs):
         """
@@ -29,7 +29,7 @@ class Network:
 
         try:
             if Const.session:
-                resp = Const.session.request(method, url, headers=header, timeout=2, **kwargs)
+                resp = Const.session.request(method, url, headers=headers, timeout=2, **kwargs)
             else:
                 resp = requests.request(method, url, headers=headers, cookies=Const.cookie, timeout=3, **kwargs)
 
@@ -37,11 +37,11 @@ class Network:
             self.retry -= 1
             if self.retry:
                 print(f"pid:{Const.pid} 登陆失败！重试——→{self.retry}")
-                resp = self.request(method, url, raw=True, headers=None, **kwargs)
+                resp = self.request(method, url, raw=True, headers=headers, **kwargs)
             else:
                 raise Exception("登陆拉了")
 
-        self.retry = 10
+        self.retry = 20
         if not resp.ok:
             raise Exception(resp.status_code)
 

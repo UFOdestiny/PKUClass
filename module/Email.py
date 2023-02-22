@@ -21,7 +21,7 @@ class QQMail(Email):
         self._name = self._getName()
         self._smtp = self._connect()
 
-        if receiver is not None:
+        if self._use and receiver is not None:
             self._receivers.extend(receiver)
 
     def _getName(self):
@@ -46,19 +46,20 @@ class QQMail(Email):
         return msg.as_string()
 
     def send(self, msg="MESSAGE IS EMPTY", from_=None, to=None, subject=None):
-        if not from_:
-            from_ = self._name
-        if not to:
-            to = self._receivers[0]
-        if not subject:
-            subject = msg
+        if self._use:
+            if not from_:
+                from_ = self._name
+            if not to:
+                to = self._receivers[0]
+            if not subject:
+                subject = msg
 
-        msg = self._message(msg=msg, from_=from_, to=to, subject=subject)
+            msg = self._message(msg=msg, from_=from_, to=to, subject=subject)
 
-        try:
-            self._smtp.sendmail(self._sender, self._receivers, msg)
-        except smtplib.SMTPException:
-            print("SEND FAILURE")
+            try:
+                self._smtp.sendmail(self._sender, self._receivers, msg)
+            except smtplib.SMTPException:
+                print("SEND FAILURE")
 
 
 if __name__ == "__main__":
